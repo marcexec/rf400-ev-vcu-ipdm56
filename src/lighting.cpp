@@ -6,7 +6,6 @@ LightingSystem lighting;
 LightingSystem::LightingSystem()
     : _turnState(TurnState::OFF)
     , _hazardsLatched(false)
-    , _heatedSeatOn(false) // Always OFF on boot!
     , _hyperflashL(false)
     , _hyperflashR(false)
     , _bootTimeMs(0)
@@ -18,7 +17,6 @@ void LightingSystem::begin() {
     _bootTimeMs = millis();
     _turnState = TurnState::OFF;
     _hazardsLatched = false;
-    _heatedSeatOn = false; // Always OFF on boot!
     _hyperflashL = false;
     _hyperflashR = false;
     _flasher.stop();
@@ -28,7 +26,6 @@ void LightingSystem::begin() {
     ipdm::pinMode(PIN_FRONT_DRL_R, OUTPUT);
     ipdm::pinMode(PIN_TURN_LIGHT_L, OUTPUT);
     ipdm::pinMode(PIN_TURN_LIGHT_R, OUTPUT);
-    ipdm::pinMode(PIN_HEATED_SEAT_PWR, OUTPUT);
 
     // Configure Low-Side cluster lamp channels
     ipdm::pinMode(PIN_DASH_TURN_LED, OUTPUT);
@@ -39,7 +36,6 @@ void LightingSystem::begin() {
     // Initial safe state
     ipdm::digitalWrite(PIN_TURN_LIGHT_L, LOW);
     ipdm::digitalWrite(PIN_TURN_LIGHT_R, LOW);
-    ipdm::digitalWrite(PIN_HEATED_SEAT_PWR, LOW);
     ipdm::digitalWrite(PIN_DASH_TURN_LED, LOW);
     ipdm::digitalWrite(PIN_DASH_READY_LED, HIGH); // Cluster neutral lamp = READY
     ipdm::digitalWrite(PIN_EV_FAULT_LED, LOW);
@@ -85,11 +81,6 @@ void LightingSystem::setHazards(bool enable) {
         _turnState = TurnState::OFF;
         _flasher.stop();
     }
-}
-
-void LightingSystem::toggleHeatedSeat() {
-    _heatedSeatOn = !_heatedSeatOn;
-    ipdm::digitalWrite(PIN_HEATED_SEAT_PWR, _heatedSeatOn);
 }
 
 void LightingSystem::sampleTurnCurrent(uint16_t &rawL, uint16_t &rawR) {

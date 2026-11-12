@@ -39,7 +39,8 @@ rf400-ev-vcu-ipdm56/
 │   ├── config.h                # Master pin definitions, calibration constants, cadences
 │   ├── param_def.h             # Vehicle telemetry parameters (ISA shunt, 4s LFP rail)
 │   ├── inputs.h / .cpp         # Turn switch change-detection & starter multi-press
-│   ├── lighting.h / .cpp       # 80/100/160 cpm blinkers, hazards, DRL winking, heated seat
+│   ├── lighting.h / .cpp       # 80/100/160 cpm blinkers, hazards, DRL winking
+│   ├── seat_heater.h / .cpp    # Heated seat controller (HOUT6), failsafe OFF on boot
 │   ├── tacho.h / .cpp          # 2-stage boot sweep + bi-directional current meter (tone())
 │   ├── isa_can_bus.h / .cpp    # ISAscale IVT-S CAN shunt decoder + 1s timeout failsafe
 │   ├── power.h / .cpp          # 4s LiFePO4 battery monitoring with 3s hysteresis alert (<11.6V)

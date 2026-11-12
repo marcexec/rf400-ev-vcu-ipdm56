@@ -8,10 +8,11 @@
  *
  * Operational Modules:
  * - cli           : Lebowski-like Serial CLI at 115200 8N1 (Press 'm' for menu)
- * - isaBus        : ISAscale IVT-S current shunt decoder on CAN1 (500 kbps)
- * - tacho         : 2-stage startup sweep + bi-directional current meter (tone())
+ * - isaBus        : ISAscale IVT-S current shunt decoder on CAN1 (500 kbps), Jaguar version without voltage measurements
+ * - tacho         : 2-stage startup sweep + bi-directional current meter (tone()) on 90's RPM gauge
  * - lighting      : Turn indicators (80 cpm), Hazards (100 cpm), DRL winking,
- *                   hyperflash detection (160 cpm), Heated seat (HOUT6)
+ *                   hyperflash detection (160 cpm)
+ * - seatHeater    : Heated seat controller (HOUT6), always OFF on boot
  * - powerMon      : 4s LiFePO4 battery monitoring with 3s hysteresis alert (<11.6V)
  * - inputs        : Handlebar turn switch polling + Starter button OneButton logic
  * ==============================================================================
@@ -26,6 +27,7 @@
 #include "isa_can_bus.h"
 #include "tacho.h"
 #include "lighting.h"
+#include "seat_heater.h"
 #include "power.h"
 #include "inputs.h"
 #include "cli.h"
@@ -41,6 +43,7 @@ void setup() {
     isaBus.begin();
     tacho.begin();
     lighting.begin();
+    seatHeater.begin();
     powerMon.begin();
     inputs.begin();
 

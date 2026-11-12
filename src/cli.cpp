@@ -3,6 +3,7 @@
 #include "isa_can_bus.h"
 #include "tacho.h"
 #include "lighting.h"
+#include "seat_heater.h"
 #include "power.h"
 #include "inputs.h"
 
@@ -104,9 +105,9 @@ void SerialCli::handleMenuInput(char c) {
 
         case 'd':
         case 'D':
-            lighting.toggleHeatedSeat();
+            seatHeater.toggle();
             Serial.print(F("Heated Seat: "));
-            Serial.println(lighting.isHeatedSeatOn() ? F("ON (+12V)") : F("OFF"));
+            Serial.println(seatHeater.isOn() ? F("ON (+12V)") : F("OFF"));
             break;
 
         case 'e':
@@ -176,7 +177,7 @@ void SerialCli::printTelemetryLine() {
         case TurnState::OFF:     Serial.print(F("OFF")); break;
     }
 
-    if (lighting.isHeatedSeatOn()) {
+    if (seatHeater.isOn()) {
         Serial.print(F(" | SEAT: ON"));
     }
     Serial.println();
@@ -197,7 +198,7 @@ void SerialCli::printDetailedStatus() {
     Serial.print(F("  Switches Raw:      L=")); Serial.print(inputs.isTurnLeftActive());
     Serial.print(F(", R=")); Serial.print(inputs.isTurnRightActive());
     Serial.print(F(", Starter=")); Serial.println(inputs.isStarterPressed());
-    Serial.print(F("  Heated Seat (HOUT6): ")); Serial.println(lighting.isHeatedSeatOn() ? F("ON") : F("OFF"));
+    Serial.print(F("  Heated Seat (HOUT6): ")); Serial.println(seatHeater.isOn() ? F("ON") : F("OFF"));
     Serial.println(F("-----------------------------------"));
 }
 

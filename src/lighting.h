@@ -9,9 +9,9 @@
  * 4. Front DRL Winking (HOUT4, HOUT9): DRL shuts off on active turn side.
  * 5. Dashboard Turn LED (LOUT1): Flashes synchronously with active blinker.
  * 6. Dashboard Backlight (LOUT2): Soft boot-up and low-voltage pulse warning.
- * 7. Heated Seat (HOUT6): Toggleable via starter long-press, failsafe off on boot.
  *
  * Uses generic ipdm::Flasher primitive for non-blocking cadence generation.
+ * (Heated seat controller has been segregated into its own seat_heater module).
  * ==============================================================================
  */
 
@@ -39,11 +39,9 @@ public:
     void requestTurnOff();
     void toggleHazards();
     void setHazards(bool enable);
-    void toggleHeatedSeat();
 
     // Telemetry getters
     TurnState getTurnState() const { return _turnState; }
-    bool isHeatedSeatOn() const { return _heatedSeatOn; }
     bool isHyperflashL() const { return _hyperflashL; }
     bool isHyperflashR() const { return _hyperflashR; }
     bool isFlashPhaseOn() const { return _flasher.getOutput(); }
@@ -54,7 +52,6 @@ public:
 private:
     TurnState _turnState;
     bool _hazardsLatched;
-    bool _heatedSeatOn;
 
     bool _hyperflashL;
     bool _hyperflashR;

@@ -1,5 +1,6 @@
 #include "inputs.h"
 #include "lighting.h"
+#include "seat_heater.h"
 
 InputManager inputs;
 
@@ -60,7 +61,7 @@ void InputManager::processTurnSwitches() {
 void InputManager::processStarterButton() {
     // Check for Long Press event (held > 800ms) -> Toggle heated seat
     if (_starterBtn.wasLongPressed()) {
-        lighting.toggleHeatedSeat();
+        seatHeater.toggle();
         Serial.println(F("[BTN] Long Press -> Heated Seat Toggled"));
     }
 
