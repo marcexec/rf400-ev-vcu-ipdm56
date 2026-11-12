@@ -1,0 +1,22 @@
+# PlatformIO build artifacts
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Object files and binaries
+*.o
+*.a
+*.elf
+*.hex
+*.bin
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# System and temporary files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.bak
