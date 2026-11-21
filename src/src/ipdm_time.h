@@ -29,7 +29,7 @@ unsigned long timestamp_age(unsigned long timestamp);
 // NOTE: Keep in mind this uses the value that will overflow at 4294967296ms
 bool timestamp_younger_than(unsigned long timestamp, unsigned long max_age);
 
-static bool ENM_compare_and_update(unsigned long &t0, const unsigned long &interval)
+static inline bool ENM_compare_and_update(unsigned long &t0, const unsigned long &interval)
 {
 	bool trigger_now = timestamp_age(t0) >= interval;
 	if(trigger_now)
@@ -39,7 +39,7 @@ static bool ENM_compare_and_update(unsigned long &t0, const unsigned long &inter
 
 #define EVERY_N_MILLISECONDS(ms) for(static unsigned long t0 = 0; ::ipdm::ENM_compare_and_update(t0, ms); )
 
-static void print_timestamp(Stream &dst, uint32_t t)
+static inline void print_timestamp(Stream &dst, uint32_t t)
 {
 	char format_buf[17];
 	int ms = t % 1000;
@@ -58,7 +58,7 @@ static void print_timestamp(Stream &dst, uint32_t t)
 	dst.print(format_buf);
 }
 
-static void util_print_timestamp(Stream &dst)
+static inline void util_print_timestamp(Stream &dst)
 {
 	print_timestamp(dst, millis());
 }
@@ -67,7 +67,7 @@ static void util_print_timestamp(Stream &dst)
 void time_loop();
 
 // Deprecated
-static uint32_t longtime() { return millis(); }
+static inline uint32_t longtime() { return millis(); }
 
 } // namespace idpm
 

@@ -16,11 +16,13 @@
 ### High-Side Outputs (`HOUT`, +12V Switched, 3A PPTC Fused)
 | Channel | Function | Wire / Component | Operational Rules |
 |:---|:---|:---|:---|
+| **`HOUT1`** | **`PIN_DASH_BACKLIGHT`**| Cluster Backlight (+12V) | Steady ON normal; pulses when 4s LFP auxiliary voltage drops below 11.6V. |
+| **`HOUT3`** | **`PIN_ISA_PWR`** | ISA Shunt +12V Rail | Powers ISAscale IVT-S current sensor. Delayed auto-enable 500ms after boot; CLI controllable. |
 | **`HOUT4`** | **`PIN_FRONT_DRL_L`** | Left Lucifer White DRL | Steady ON with ignition; **winks OFF** during Left turn. |
-| **`HOUT9`** | **`PIN_FRONT_DRL_R`** | Right Lucifer White DRL | Steady ON with ignition; **winks OFF** during Right turn. |
 | **`HOUT6`** | **`PIN_HEATED_SEAT_PWR`**| Heated Seat Element (+12V) | Toggled via Starter Button long-press; **always OFF on boot**. |
 | **`HOUT7`** | **`PIN_TURN_LIGHT_L`** | Left Turn Circuit (+12V) | Flashes at 80 cpm (160 cpm hyperflash on burnt bulb/LED). Current sense monitored on expander pin `ED8`. |
 | **`HOUT8`** | **`PIN_TURN_LIGHT_R`** | Right Turn Circuit (+12V) | Flashes at 80 cpm (160 cpm hyperflash on burnt bulb/LED). Current sense monitored on expander pin `ED9`. |
+| **`HOUT9`** | **`PIN_FRONT_DRL_R`** | Right Lucifer White DRL | Steady ON with ignition; **winks OFF** during Right turn. |
 
 ---
 
@@ -28,7 +30,7 @@
 | Channel | Function | Wire / Component | Operational Rules |
 |:---|:---|:---|:---|
 | **`LOUT1`** | **`PIN_DASH_TURN_LED`** | Dash Turn Lamp (Green) | Flashes synchronously with active blinker or hazards. |
-| **`LOUT2`** | **`PIN_DASH_BACKLIGHT`**| Cluster Backlight | Steady ON normal; pulses when 4s LFP voltage drops below 11.6V. |
+| **`LOUT2`** | *(Spare)* | Open / Unused | Freed up after migrating dash backlight to high-side `HOUT1`. |
 | **`LOUT3`** | **`PIN_DASH_SIDESTAND`**| Dash Side-Stand Lamp | Amber warning lamp (Stage 2). |
 | **`LOUT4`** | **`PIN_DASH_READY_LED`** | Repurposed OEM Neutral Lamp| Solid Green when system is READY / armed. |
 | **`LOUT5`** | **`PIN_EV_FAULT_LED`** | Repurposed OEM Oil Lamp | Red Warning Lamp: illuminates if CAN communication to ISA shunt drops out (>1s timeout). |

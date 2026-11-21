@@ -64,6 +64,8 @@ rf400-ev-vcu-ipdm56/
 ### High-Side Outputs (+12V Switched, 3A PPTC Fused)
 | Channel | Expander Pin | Logical Signal | Load / Behavior |
 |:---|:---|:---|:---|
+| **`HOUT1`** | `ED28` | `PIN_DASH_BACKLIGHT` | Instrument Cluster Backlight (+12V High-Side, steady ON; pulses alert when 4s LFP auxiliary rail < 11.6V). |
+| **`HOUT3`** | `ED30` | `PIN_ISA_PWR` | ISAscale IVT-S Shunt Power (+12V, auto-delayed enable 500ms after boot, CLI-controllable reset). |
 | **`HOUT4`** | `ED31` | `PIN_FRONT_DRL_L` | Left Front Position / DRL (+12V, **winks OFF** on Left turn). |
 | **`HOUT6`** | `ED22` | `PIN_HEATED_SEAT_PWR`| Heated Seat Element (+12V, toggled via Starter long-press; **always OFF on boot**). |
 | **`HOUT7`** | `ED12` | `PIN_TURN_LIGHT_L` | Left Turn Signal Circuit (+12V, 80 cpm normal, 160 cpm hyperflash). Monitored on `ED8`. |
@@ -74,7 +76,7 @@ rf400-ev-vcu-ipdm56/
 | Channel | Expander Pin | Logical Signal | Load / Behavior |
 |:---|:---|:---|:---|
 | **`LOUT1`** | `ED21` | `PIN_DASH_TURN_LED` | Dash Turn Indicator (Green Arrow LED, flashes with active blinker/hazards). |
-| **`LOUT2`** | `ED20` | `PIN_DASH_BACKLIGHT`| Instrument Cluster Backlight (Pulsing alert when 4s LFP auxiliary rail < 11.6V). |
+| **`LOUT2`** | `ED20` | *(Spare)* | Originally low-side dash backlight; freed up after migrating to high-side `HOUT1`. |
 | **`LOUT3`** | `ED19` | `PIN_DASH_SIDESTAND`| Dash Side-Stand Lamp (Amber warning lamp, Stage 2). |
 | **`LOUT4`** | `ED18` | `PIN_DASH_READY_LED` | Repurposed OEM Neutral Lamp (**Solid Green = VCU Armed / Ready**). |
 | **`LOUT5`** | `ED17` | `PIN_EV_FAULT_LED` | Repurposed OEM Oil Lamp (**Red = CAN Comms Lost / Shunt Dropout**). |

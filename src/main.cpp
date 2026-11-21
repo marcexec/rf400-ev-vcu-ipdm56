@@ -33,6 +33,9 @@
 #include "cli.h"
 
 void setup() {
+    // Let avrdude verify protocol complete without serial collision on upload
+    delay(500);
+
     // 1. Initialize Serial CLI first so startup messages are visible immediately
     cli.begin();
 

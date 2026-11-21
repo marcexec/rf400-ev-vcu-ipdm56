@@ -37,6 +37,9 @@ constexpr int PIN_SIDE_STAND_SW   = 2;            // Active-LOW when stand is DO
 // ==============================================================================
 // 2. PIN ALLOCATIONS - HIGH-SIDE MOSFET OUTPUTS (+12V Switched, 3A PPTC)
 // ==============================================================================
+// Instrument Cluster Backlight Illumination (+12V Switched High-Side)
+constexpr int PIN_DASH_BACKLIGHT  = ipdm::HOUT1;  // ED28: Cluster Backlight Illumination
+
 // Left and Right Front Position / DRL lights (White LEDs on Lucifer mirrors + indicators)
 constexpr int PIN_FRONT_DRL_L     = ipdm::HOUT4;  // ED31: Left DRL (+12V, winks off on left turn)
 constexpr int PIN_FRONT_DRL_R     = ipdm::HOUT9;  // ED14: Right DRL (+12V, winks off on right turn)
@@ -44,6 +47,12 @@ constexpr int PIN_FRONT_DRL_R     = ipdm::HOUT9;  // ED14: Right DRL (+12V, wink
 // Heated Seat Pad (+12V Switched, toggled via Starter Button Long Press)
 // Failsafe: ALWAYS OFF on boot!
 constexpr int PIN_HEATED_SEAT_PWR = ipdm::HOUT6;  // ED22: Heated seat power (+12V)
+
+// ISAscale IVT-S Shunt Power Supply (HOUT3, switched +12V rail to shunt board)
+// Controlled by isa_can_bus to allow CAN power cycle / reset via CLI
+// Boot delay before enabling: allows iPDM I2C expanders and MCU to fully settle
+constexpr int PIN_ISA_PWR         = ipdm::HOUT3;  // ED30: ISA shunt +12V switched power
+constexpr unsigned long ISA_POWER_ON_DELAY_MS = 500; // ms after boot before enabling ISA power
 
 // Left and Right Turn Signal Power (Current-monitored channels)
 constexpr int PIN_TURN_LIGHT_L    = ipdm::HOUT7;  // ED12: Left turn circuit (+12V)
@@ -58,7 +67,7 @@ constexpr int PIN_SENSE_TURN_R    = ipdm::HOUT8_MONITOR; // ED9: High-side monit
 // ==============================================================================
 // Instrument Cluster Warning and Indicator Lamps
 constexpr int PIN_DASH_TURN_LED   = ipdm::LOUT1;  // ED21: Dash Green Turn Arrow LED (80/100/160 cpm)
-constexpr int PIN_DASH_BACKLIGHT  = ipdm::LOUT2;  // ED20: Cluster Backlight Illumination
+// LOUT2: Spare (was originally dash backlight before moving to high-side HOUT1)
 constexpr int PIN_DASH_SIDESTAND  = ipdm::LOUT3;  // ED19: Dash Amber Side-Stand Lamp (Stage 2)
 constexpr int PIN_DASH_READY_LED  = ipdm::LOUT4;  // ED18: Repurposed OEM Neutral Lamp (Green = READY)
 constexpr int PIN_EV_FAULT_LED    = ipdm::LOUT5;  // ED17: Repurposed OEM Oil Lamp (Red = Fault/CAN drop)

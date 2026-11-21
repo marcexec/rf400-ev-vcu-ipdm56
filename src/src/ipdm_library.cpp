@@ -43,7 +43,7 @@ void loop()
 	reset_watchdog();
 
 	EVERY_N_MILLISECONDS(100){
-		bool switched_5v_ok_was = switched_5v_ok;
+		// bool switched_5v_ok_was = switched_5v_ok;
 		switched_5v_ok = (analogRead_mV_factor16(VBAT_PIN, ADC_FACTOR16_VBAT) >= MIN_VBAT_MV_FOR_5VSW && digitalRead(ACTIVATE_5VSW_PIN));
 
 		REPORT_BOOL(switched_5v_ok);

@@ -10,18 +10,56 @@ static void isa_can_callback(const CAN_FRAME &frame) {
 }
 
 void IsaCanBus::begin() {
-    // Configure CAN1 interface on MCP2515
+    // Configure CAN1 interface on MCP2515 at 500 kbps
     ipdm::can1_params.speed = CAN_500KBPS;
-    
-    // Enable 5V switched rail so the MCP2515 and SN65HVD230 transceiver power up
+
+    // Enable 5V switched rail so the MCP2515 logic and SN65HVD230 transceiver power up
     ipdm::enable_switched_5v();
-    
+
+    // Configure HOUT3 as output but leave ISA shunt UNPOWERED on boot.
+    // enablePower() is called automatically after ISA_POWER_ON_DELAY_MS in update(),
+    // or can be triggered immediately via CLI.
+    ipdm::pinMode(PIN_ISA_PWR, OUTPUT);
+    ipdm::digitalWrite(PIN_ISA_PWR, LOW);
+
     _lastFrameTime = 0;
     _packetCount = 0;
     _healthy = false;
+    _powered = false;
+    _powerDelayDone = false;
+    _bootMs = millis();
+}
+
+void IsaCanBus::enablePower() {
+    ipdm::digitalWrite(PIN_ISA_PWR, HIGH);
+    _powered = true;
+    _powerDelayDone = true;
+    // Clear stale health state so we start fresh after power-on
+    _lastFrameTime = 0;
+    _healthy = false;
+    Serial.println(F("[ISA] Power ON (HOUT3)"));
+}
+
+void IsaCanBus::disablePower() {
+    ipdm::digitalWrite(PIN_ISA_PWR, LOW);
+    _powered = false;
+    _currentMA = 0;
+    _healthy = false;
+    _lastFrameTime = 0;
+    Serial.println(F("[ISA] Power OFF (HOUT3) - shunt reset"));
 }
 
 void IsaCanBus::update() {
+    // Delayed auto-enable: power the ISA shunt after boot settling time
+    if (!_powerDelayDone && (millis() - _bootMs >= ISA_POWER_ON_DELAY_MS)) {
+        enablePower();
+    }
+
+    if (!_powered) {
+        _healthy = false;
+        return;
+    }
+
     // Poll the MCP2515 receiver buffer
     ipdm::can_receive(ipdm::can1, isa_can_callback);
 
@@ -52,4 +90,3 @@ void IsaCanBus::handleFrame(const CAN_FRAME &frame) {
         }
     }
 }
-

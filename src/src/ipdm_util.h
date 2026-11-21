@@ -215,7 +215,7 @@ namespace ipdm
 
 #define DEBUG_PRINT_LOCATION(delay_ms) { CONSOLE.print(__FILE__ ":"); CONSOLE.println(__LINE__); delay(delay_ms); }
 
-static uint16_t limit_uint16(uint16_t v, uint16_t min, uint16_t max)
+static inline uint16_t limit_uint16(uint16_t v, uint16_t min, uint16_t max)
 {
 	if(v < min)
 		return min;
@@ -224,7 +224,7 @@ static uint16_t limit_uint16(uint16_t v, uint16_t min, uint16_t max)
 	return v;
 }
 
-static int16_t limit_int16(int16_t v, int16_t min, int16_t max)
+static inline int16_t limit_int16(int16_t v, int16_t min, int16_t max)
 {
 	if(v < min)
 		return min;
@@ -233,7 +233,7 @@ static int16_t limit_int16(int16_t v, int16_t min, int16_t max)
 	return v;
 }
 
-static int32_t limit_int32(int32_t v, int32_t min, int32_t max)
+static inline int32_t limit_int32(int32_t v, int32_t min, int32_t max)
 {
 	if(v < min)
 		return min;

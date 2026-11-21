@@ -46,27 +46,27 @@ void Params::clear_timed_out_values()
 }
 
 // Returns true on match
-static bool compare_hysteresis(int a, int b, int hysteresis)
+static inline bool compare_hysteresis(int a, int b, int hysteresis)
 {
 	return abs(a - b) < hysteresis;
 }
 
-static bool compare_hysteresis(int32_t a, int32_t b, int hysteresis)
+static inline bool compare_hysteresis(int32_t a, int32_t b, int hysteresis)
 {
 	return labs(a - b) < hysteresis;
 }
 
-static bool compare_hysteresis(uint16_t a, uint16_t b, int hysteresis)
+static inline bool compare_hysteresis(uint16_t a, uint16_t b, int hysteresis)
 {
-	return abs(a - b) < hysteresis;
+	return (a > b ? a - b : b - a) < (uint16_t)hysteresis;
 }
 
-static bool compare_hysteresis(uint32_t a, uint32_t b, int hysteresis)
+static inline bool compare_hysteresis(uint32_t a, uint32_t b, int hysteresis)
 {
 	return (a > b ? a - b : b - a) < (uint32_t)hysteresis;
 }
 
-static bool compare_hysteresis(bool a, bool b, int hysteresis)
+static inline bool compare_hysteresis(bool a, bool b, int /*hysteresis*/)
 {
 	return a == b;
 }

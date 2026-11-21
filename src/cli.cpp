@@ -61,6 +61,9 @@ void SerialCli::printMainMenu() {
     Serial.println(F("g) Simulate ISA shunt current (-10 Amps regen)"));
     Serial.println(F("h) Simulate ISA shunt current (0 Amps)"));
     Serial.println(F("i) Detailed system I/O & ADC report"));
+    Serial.println(F("j) Read raw matrix pin states (M1-M4)"));
+    Serial.println(F("k) ISA shunt POWER ON  (HOUT3)"));
+    Serial.println(F("l) ISA shunt POWER OFF (HOUT3 reset)"));
     Serial.println(F("z) Return to live running mode"));
     Serial.print(F("------> "));
 }
@@ -143,6 +146,37 @@ void SerialCli::handleMenuInput(char c) {
             printDetailedStatus();
             break;
 
+        case 'j':
+        case 'J':
+            // Raw matrix pin readout — useful for bench wiring verification
+            Serial.println(F("--- Matrix pins ---"));
+            Serial.print(F(" M1 A0 TACHO: "));
+            Serial.println(digitalRead(A0));
+            Serial.print(F(" M2 A1 START: "));
+            Serial.print(digitalRead(A1));
+            Serial.println(digitalRead(A1) ? F(" (open)") : F(" (GND/PRESSED)"));
+            Serial.print(F(" M3 A2 TURN_L:"));
+            Serial.print(digitalRead(A2));
+            Serial.println(digitalRead(A2) ? F(" (off)") : F(" (active)"));
+            Serial.print(F(" M4 A3 TURN_R:"));
+            Serial.print(digitalRead(A3));
+            Serial.println(digitalRead(A3) ? F(" (off)") : F(" (active)"));
+            Serial.print(F(" M6 D2 STAND: "));
+            Serial.print(digitalRead(2));
+            Serial.println(digitalRead(2) ? F(" (up)") : F(" (DOWN)"));
+            Serial.println(F(" TIP: A1->GND <800ms=click >800ms=seatHeat"));
+            break;
+
+        case 'k':
+        case 'K':
+            isaBus.enablePower();   // prints [ISA] Power ON (HOUT3)
+            break;
+
+        case 'l':
+        case 'L':
+            isaBus.disablePower();  // prints [ISA] Power OFF (HOUT3)
+            break;
+
         case 'z':
         case 'Z':
             _inMenu = false;
@@ -161,6 +195,7 @@ void SerialCli::printTelemetryLine() {
     Serial.print(F("[LIVE] 4s LFP: "));
     Serial.print(powerMon.getVoltageVolts(), 2);
     Serial.print(F("V | ISA: "));
+    Serial.print(isaBus.isPowered() ? F("") : F("OFF|"));
     Serial.print(isaBus.getCurrentAmps(), 1);
     Serial.print(F("A ("));
     Serial.print(isaBus.isHealthy() ? F("OK") : F("LOST"));
@@ -189,6 +224,7 @@ void SerialCli::printDetailedStatus() {
     Serial.print(F("  4s LFP Voltage:    ")); Serial.print(powerMon.getVoltageVolts(), 2);
     Serial.print(F(" V (Raw: ")); Serial.print(powerMon.getVoltageMV()); Serial.println(F(" mV)"));
     Serial.print(F("  Low-Voltage Alert: ")); Serial.println(powerMon.isLowVoltageAlert() ? F("ACTIVE (<11.6V)") : F("NORMAL"));
+    Serial.print(F("  ISA Shunt Power:   ")); Serial.println(isaBus.isPowered() ? F("ON (HOUT3)") : F("OFF (HOUT3)"));
     Serial.print(F("  ISA Shunt Current: ")); Serial.print(isaBus.getCurrentAmps(), 2); Serial.println(F(" A"));
     Serial.print(F("  ISA CAN Packets:   ")); Serial.println(isaBus.getPacketCount());
     Serial.print(F("  ISA Frame Age:     ")); Serial.print(isaBus.getLastFrameAgeMs()); Serial.println(F(" ms"));
