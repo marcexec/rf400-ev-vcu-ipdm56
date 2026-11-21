@@ -103,17 +103,25 @@ void Tachometer::update(int32_t currentMA, bool canHealthy) {
             break;
 
         case TachoBootStage::STAGE2_FLICK_UP:
-            // Fast "Ready" flick from 0 to 16k (+800 RPM per 15ms -> ~300ms snap)
-            _virtualRPM += 800.0f;
+            // Fast "Ready" flick from 0 to 16k (+500 RPM per 15ms -> ~480ms snap)
+            _virtualRPM += 500.0f;
             if (_virtualRPM >= (float)TACHO_MAX_RPM) {
                 _virtualRPM = (float)TACHO_MAX_RPM;
+                _stage = TachoBootStage::STAGE2_HOLD_TOP;
+                _stageTimerMs = now;
+            }
+            break;
+
+        case TachoBootStage::STAGE2_HOLD_TOP:
+            // Hold at 16,000 RPM peak for 180ms to let physical needle inertia catch up to 16k
+            if (now - _stageTimerMs > 180) {
                 _stage = TachoBootStage::STAGE2_SNAP_BACK;
             }
             break;
 
         case TachoBootStage::STAGE2_SNAP_BACK:
-            // Snappy snap back to 6k center mark (-700 RPM per 15ms)
-            _virtualRPM -= 700.0f;
+            // Snappy snap back to 6k center mark (-600 RPM per 15ms)
+            _virtualRPM -= 600.0f;
             if (_virtualRPM <= TACHO_CALIBRATED_ZERO) {
                 _virtualRPM = TACHO_CALIBRATED_ZERO;
                 _targetRPM = TACHO_CALIBRATED_ZERO;
@@ -168,7 +176,8 @@ void Tachometer::calculateAndApplyTone() {
         _outputFreq = 0.0f;
     }
 
-    if (_outputFreq >= 1.0f) {
+    // Low-frequency cutoff: below 5 Hz (< 300 RPM), disable tone to prevent ultra-low frequency DC ripple
+    if (_outputFreq >= 5.0f) {
         tone(PIN_TACHO_OUT, (unsigned int)_outputFreq);
     } else {
         noTone(PIN_TACHO_OUT);

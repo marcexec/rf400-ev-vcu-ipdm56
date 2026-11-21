@@ -29,6 +29,7 @@ enum class TachoBootStage {
     STAGE1_DROP_ZERO,  // Fast drop all the way to 0 RPM
     STAGE1_PAUSE_ZERO, // Brief settle at zero
     STAGE2_FLICK_UP,   // Fast snappy flick to 16k
+    STAGE2_HOLD_TOP,   // Hold at 16k peak (180ms) so needle reaches full scale
     STAGE2_SNAP_BACK,  // Fast snap back to calibrated 6,000 RPM center
     LIVE_TRACKING      // Armed and tracking live ISA traction current
 };

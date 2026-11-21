@@ -176,13 +176,23 @@ public:
 
 	void reset()
 	{
+		unsigned long now = millis();
+		bool raw_read = ipdm::digitalRead(m_pin);
+		bool pin_pressed = m_active_low ? (!raw_read) : raw_read;
+
+		m_raw_state = pin_pressed;
+		m_last_raw_state = pin_pressed;
+		m_debounced_state = pin_pressed;
+		m_last_change_ms = now;
+		m_press_start_ms = now;
+		m_release_ms = now;
 		m_click_count = 0;
 		m_single_click_event = false;
 		m_double_click_event = false;
 		m_triple_click_event = false;
-		m_long_press_reported = false;
+		m_long_press_reported = pin_pressed;
 		m_long_release_event = false;
-		m_prev_lp = false;
+		m_prev_lp = pin_pressed;
 	}
 
 private:
