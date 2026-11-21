@@ -1,6 +1,7 @@
 #include "inputs.h"
 #include "lighting.h"
 #include "seat_heater.h"
+#include "tacho.h"
 
 InputManager inputs;
 
@@ -9,7 +10,7 @@ InputManager::InputManager()
     , _rawTurnR(false)
     , _lastTurnL(false)
     , _lastTurnR(false)
-    , _starterBtn(PIN_STARTER_BTN, true, 30, 800, 350)
+    , _starterBtn(PIN_STARTER_BTN, true, 50, 800, 350)
 {
 }
 
@@ -59,6 +60,12 @@ void InputManager::processTurnSwitches() {
 }
 
 void InputManager::processStarterButton() {
+    // Suppress starter button clicks during tachometer boot sweep
+    if (!tacho.isBootSweepComplete()) {
+        _starterBtn.reset();
+        return;
+    }
+
     // Check for Long Press event (held > 800ms) -> Toggle heated seat
     if (_starterBtn.wasLongPressed()) {
         seatHeater.toggle();

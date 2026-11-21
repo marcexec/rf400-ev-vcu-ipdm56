@@ -81,7 +81,7 @@ constexpr uint32_t ISA_CAN_FRAME_ID     = 0x3C3;  // ISAscale IVT-S current fram
 constexpr uint8_t  ISA_CAN_MUX_CURRENT  = 0x0C;   // Current measurement multiplexer byte
 
 // Gauge Scaling & Physical Zero Offset
-constexpr float TACHO_MA_TO_RPM_RATIO   = 50.0f;  // 200mA traction current = 10,000 RPM deflection
+constexpr float TACHO_MA_TO_RPM_RATIO   = 0.05f;  // 200A (200,000mA) traction current = 10,000 RPM deflection (50 RPM / Amp)
 constexpr int   TACHO_MAX_RPM           = 16000;  // Full scale dial deflection limit
 constexpr float TACHO_ZERO_MARK_RPM     = 6000.0f;// Dial mark corresponding to 0 Amps
 constexpr float TACHO_ZERO_OFFSET_RPM   = -350.0f;// Physical dial alignment calibration (-350 RPM)

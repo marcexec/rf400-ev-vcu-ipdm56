@@ -24,12 +24,12 @@
 
 enum class TachoBootStage {
     BOOT_DELAY,        // Brief pause after power-on
-    STAGE1_SWEEP_UP,   // Slow smooth sweep up to 16k
+    STAGE1_SWEEP_UP,   // Smooth sweep up to 16k
     STAGE1_HOLD_TOP,   // Brief pause at peak
-    STAGE1_DROP_ZERO,  // Smooth descent to 6,000 RPM (0 Amp mark)
+    STAGE1_DROP_ZERO,  // Fast drop all the way to 0 RPM
     STAGE1_PAUSE_ZERO, // Brief settle at zero
     STAGE2_FLICK_UP,   // Fast snappy flick to 16k
-    STAGE2_SNAP_BACK,  // Fast snap back to 6,000 RPM
+    STAGE2_SNAP_BACK,  // Fast snap back to calibrated 6,000 RPM center
     LIVE_TRACKING      // Armed and tracking live ISA traction current
 };
 

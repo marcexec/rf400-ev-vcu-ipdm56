@@ -33,7 +33,7 @@ namespace ipdm
 class Button
 {
 public:
-	Button(int pin, bool active_low = true, uint16_t debounce_ms = 30,
+	Button(int pin, bool active_low = true, uint16_t debounce_ms = 50,
 	       uint16_t long_press_ms = 800, uint16_t multi_click_window_ms = 350)
 		: m_pin(pin)
 		, m_active_low(active_low)
@@ -41,8 +41,9 @@ public:
 		, m_long_press_ms(long_press_ms)
 		, m_multi_click_window_ms(multi_click_window_ms)
 		, m_raw_state(false)
-		, m_prev_state(false)
-		, m_is_held(false)
+		, m_last_raw_state(false)
+		, m_debounced_state(false)
+		, m_last_change_ms(0)
 		, m_press_start_ms(0)
 		, m_release_ms(0)
 		, m_click_count(0)
@@ -51,15 +52,20 @@ public:
 		, m_triple_click_event(false)
 		, m_long_press_reported(false)
 		, m_long_release_event(false)
+		, m_prev_lp(false)
 	{
 	}
 
 	void begin()
 	{
 		ipdm::pinMode(m_pin, m_active_low ? INPUT_PULLUP : INPUT);
-		m_raw_state = false;
-		m_prev_state = false;
-		m_is_held = false;
+		bool initial_raw = ipdm::digitalRead(m_pin);
+		bool initial_pressed = m_active_low ? (!initial_raw) : initial_raw;
+
+		m_raw_state = initial_pressed;
+		m_last_raw_state = initial_pressed;
+		m_debounced_state = initial_pressed;
+		m_last_change_ms = millis();
 		m_press_start_ms = 0;
 		m_release_ms = 0;
 		m_click_count = 0;
@@ -68,42 +74,54 @@ public:
 		m_triple_click_event = false;
 		m_long_press_reported = false;
 		m_long_release_event = false;
+		m_prev_lp = false;
 	}
 
 	void update()
 	{
 		unsigned long now = millis();
 		bool raw_read = ipdm::digitalRead(m_pin);
-		bool pressed = m_active_low ? (!raw_read) : raw_read;
-		m_raw_state = pressed;
+		bool pin_pressed = m_active_low ? (!raw_read) : raw_read;
+		m_raw_state = pin_pressed;
 
-		// Edge detection: Transition from unpressed to pressed
-		if (pressed && !m_prev_state) {
-			m_press_start_ms = now;
-			m_is_held = true;
-			m_long_press_reported = false;
+		// Detect change in raw pin state
+		if (pin_pressed != m_last_raw_state) {
+			m_last_change_ms = now;
+			m_last_raw_state = pin_pressed;
 		}
-		// Continuous pressed state
-		else if (pressed && m_prev_state) {
-			if (!m_long_press_reported && (now - m_press_start_ms >= m_long_press_ms)) {
+
+		// State must remain continuous and stable for >= m_debounce_ms
+		if ((now - m_last_change_ms) >= m_debounce_ms) {
+			if (pin_pressed != m_debounced_state) {
+				m_debounced_state = pin_pressed;
+
+				if (m_debounced_state) {
+					// Clean debounced PRESS transition
+					m_press_start_ms = now;
+					m_long_press_reported = false;
+				} else {
+					// Clean debounced RELEASE transition
+					unsigned long duration = now - m_press_start_ms;
+					if (m_long_press_reported) {
+						m_long_release_event = true;
+					} else if (duration >= m_debounce_ms) {
+						m_click_count++;
+						m_release_ms = now;
+					}
+				}
+			}
+		}
+
+		// Detect continuous long-press while held
+		if (m_debounced_state && !m_long_press_reported) {
+			if (now - m_press_start_ms >= m_long_press_ms) {
 				m_long_press_reported = true;
 				m_click_count = 0; // Cancel any pending multi-click
 			}
 		}
-		// Edge detection: Transition from pressed to unpressed
-		else if (!pressed && m_prev_state) {
-			m_is_held = false;
-			if (m_long_press_reported) {
-				m_long_release_event = true;
-			} else if (now - m_press_start_ms >= m_debounce_ms) {
-				// Valid debounced click
-				m_click_count++;
-				m_release_ms = now;
-			}
-		}
 
 		// Multi-click evaluation after quiet window expires
-		if (m_click_count > 0 && !pressed && (now - m_release_ms > m_multi_click_window_ms)) {
+		if (m_click_count > 0 && !m_debounced_state && (now - m_release_ms > m_multi_click_window_ms)) {
 			if (m_click_count == 1) {
 				m_single_click_event = true;
 			} else if (m_click_count == 2) {
@@ -113,13 +131,11 @@ public:
 			}
 			m_click_count = 0;
 		}
-
-		m_prev_state = pressed;
 	}
 
 	// Instantaneous state
-	bool isPressed() const { return m_raw_state; }
-	bool isLongPressed() const { return m_long_press_reported && m_is_held; }
+	bool isPressed() const { return m_debounced_state; }
+	bool isLongPressed() const { return m_long_press_reported && m_debounced_state; }
 
 	// Event triggers (auto-clearing on read)
 	bool wasSingleClicked()
@@ -145,10 +161,9 @@ public:
 
 	bool wasLongPressed()
 	{
-		static bool prev_lp = false;
 		bool current_lp = isLongPressed();
-		bool edge = current_lp && !prev_lp;
-		prev_lp = current_lp;
+		bool edge = current_lp && !m_prev_lp;
+		m_prev_lp = current_lp;
 		return edge;
 	}
 
@@ -167,6 +182,7 @@ public:
 		m_triple_click_event = false;
 		m_long_press_reported = false;
 		m_long_release_event = false;
+		m_prev_lp = false;
 	}
 
 private:
@@ -177,8 +193,9 @@ private:
 	uint16_t m_multi_click_window_ms;
 
 	bool m_raw_state;
-	bool m_prev_state;
-	bool m_is_held;
+	bool m_last_raw_state;
+	bool m_debounced_state;
+	unsigned long m_last_change_ms;
 	unsigned long m_press_start_ms;
 	unsigned long m_release_ms;
 	uint8_t m_click_count;
@@ -188,6 +205,7 @@ private:
 	bool m_triple_click_event;
 	bool m_long_press_reported;
 	bool m_long_release_event;
+	bool m_prev_lp;
 };
 
 } // namespace ipdm

@@ -78,33 +78,33 @@ void Tachometer::update(int32_t currentMA, bool canHealthy) {
             break;
 
         case TachoBootStage::STAGE1_HOLD_TOP:
-            // Brief pause at the top mark
-            if (now - _stageTimerMs > 300) {
+            // Brief pause at the top mark (200ms)
+            if (now - _stageTimerMs > 200) {
                 _stage = TachoBootStage::STAGE1_DROP_ZERO;
             }
             break;
 
         case TachoBootStage::STAGE1_DROP_ZERO:
-            // Smooth descent to calibrated zero mark (6,000 RPM dial mark)
-            _virtualRPM -= 250.0f;
-            if (_virtualRPM <= TACHO_CALIBRATED_ZERO) {
-                _virtualRPM = TACHO_CALIBRATED_ZERO;
+            // Fast descent all the way to 0 RPM (-500 RPM per 15ms -> ~480ms descent)
+            _virtualRPM -= 500.0f;
+            if (_virtualRPM <= 0.0f) {
+                _virtualRPM = 0.0f;
                 _stage = TachoBootStage::STAGE1_PAUSE_ZERO;
                 _stageTimerMs = now;
             }
             break;
 
         case TachoBootStage::STAGE1_PAUSE_ZERO:
-            // Brief 250ms settle at 0 Amps mark before the ready flick
-            if (now - _stageTimerMs > 250) {
+            // Brief 150ms settle at 0 RPM before the ready flick
+            if (now - _stageTimerMs > 150) {
                 _stage = TachoBootStage::STAGE2_FLICK_UP;
                 _stageTimerMs = now;
             }
             break;
 
         case TachoBootStage::STAGE2_FLICK_UP:
-            // Fast "Ready" flick to 16k (+600 RPM per 15ms -> ~250ms snap)
-            _virtualRPM += 600.0f;
+            // Fast "Ready" flick from 0 to 16k (+800 RPM per 15ms -> ~300ms snap)
+            _virtualRPM += 800.0f;
             if (_virtualRPM >= (float)TACHO_MAX_RPM) {
                 _virtualRPM = (float)TACHO_MAX_RPM;
                 _stage = TachoBootStage::STAGE2_SNAP_BACK;
@@ -112,7 +112,7 @@ void Tachometer::update(int32_t currentMA, bool canHealthy) {
             break;
 
         case TachoBootStage::STAGE2_SNAP_BACK:
-            // Snappy snap back to 6k (-700 RPM per 15ms)
+            // Snappy snap back to 6k center mark (-700 RPM per 15ms)
             _virtualRPM -= 700.0f;
             if (_virtualRPM <= TACHO_CALIBRATED_ZERO) {
                 _virtualRPM = TACHO_CALIBRATED_ZERO;
@@ -129,8 +129,14 @@ void Tachometer::update(int32_t currentMA, bool canHealthy) {
                 _targetRPM = TACHO_CAN_FAULT_RPM;
             } else {
                 // NORMAL OPERATION:
+                // Deadband filter for small shunt noise around true zero (< 50mA = 0.05A)
+                int32_t filteredMA = currentMA;
+                if (filteredMA > -50 && filteredMA < 50) {
+                    filteredMA = 0;
+                }
+
                 // Map traction current in mA to RPM deflection around calibrated center mark
-                _targetRPM = TACHO_CALIBRATED_ZERO + ((float)currentMA * TACHO_MA_TO_RPM_RATIO);
+                _targetRPM = TACHO_CALIBRATED_ZERO + ((float)filteredMA * TACHO_MA_TO_RPM_RATIO);
                 _targetRPM = constrain(_targetRPM, 0.0f, (float)TACHO_MAX_RPM);
             }
 
